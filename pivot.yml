@@ -1,0 +1,3 @@
+name: CI update
+# EXECUTE: true
+# RUN: bash pivot.sh
