@@ -1,0 +1,14 @@
+*{box-sizing:border-box}html,body{margin:0;padding:0}body{font-family:Segoe UI,Roboto,Arial,sans-serif;line-height:1.6;color:#222;background:#f7fbff}
+.page{max-width:960px;margin:2rem auto;padding:0 1rem}
+h1{color:#1565c0;margin-bottom:.5rem}
+p{color:#444}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;background:#ffffffcc;backdrop-filter:saturate(180%) blur(8px);border-bottom:1px solid #e6eef7}
+.nav__brand{font-weight:700;color:#1565c0;text-decoration:none}
+.nav__links{display:flex;gap:1rem;list-style:none;margin:0;padding:0}
+.nav__links a{color:#333;text-decoration:none;padding:.5rem .75rem;border-radius:.5rem}
+.nav__links a:hover{background:#e3f2fd}
+.footer{padding:2rem 1rem;text-align:center;border-top:1px solid #e6eef7;color:#666}
+.contact__form{display:grid;gap:1rem;max-width:480px}
+.contact__form label{display:grid;gap:.5rem}
+input,textarea{padding:.75rem 1rem;border:1px solid #d6e3f3;border-radius:.5rem;background:#fff}
+input:focus,textarea:focus{outline:none;border-color:#90caf9;box-shadow:0 0 0 3px rgba(144,202,249,.25)}
