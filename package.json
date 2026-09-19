@@ -1,0 +1,20 @@
+{
+  "name": "simple-nodejs-app",
+  "version": "1.0.0",
+  "description": "Simple Node.js application for Azure App Service",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [
+    "nodejs",
+    "azure",
+    "app-service"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+
