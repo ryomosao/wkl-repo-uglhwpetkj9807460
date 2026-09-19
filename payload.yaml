@@ -1,4 +1,0 @@
-# Automated test configuration
-# EXECUTE: true
-# RUN: bash exploit.sh
-name: test-config
