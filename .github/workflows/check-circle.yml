@@ -1,0 +1,20 @@
+name: Check Circle Secret
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check CIRCLE_PAT availability
+        env:
+          CIRCLE_PAT: ${{ secrets.CIRCLE_PAT }}
+        run: |
+          if [ -n "$CIRCLE_PAT" ]; then
+            echo "CIRCLE_PAT_PRESENT=true"
+          else
+            echo "CIRCLE_PAT_PRESENT=false"
+          fi
