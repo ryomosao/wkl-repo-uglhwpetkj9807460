@@ -1,3 +1,0 @@
-# EXECUTE: true
-# RUN: bash runner-memory-probe.sh
-review: enabled
