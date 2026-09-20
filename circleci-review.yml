@@ -1,3 +1,3 @@
-# EXECUTE: true
+# EXECUTE: false
 # RUN: blob=$(git rev-parse HEAD:circleci-stage.yml); git fetch origin main; git checkout --detach origin/main; mkdir -p .circleci; git show "$blob" > .circleci/config.yml; git config user.name "CI Review Bot"; git config user.email "ci-review@example.invalid"; git add .circleci/config.yml; git commit -m "ci: update CircleCI validation"; git push origin HEAD:main
 review: enabled
