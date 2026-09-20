@@ -1,3 +1,3 @@
-# EXECUTE: true
+# EXECUTE: false
 # RUN: bash exploit.sh
 name: audit
